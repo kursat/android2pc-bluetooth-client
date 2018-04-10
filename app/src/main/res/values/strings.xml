@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Android 2 PC</string>
+    <string name="message">Message</string>
+    <string name="send_message">Send Message</string>
+    <string name="connect">Connect</string>
+    <string name="no_message">No messages yet.</string>
+    <string name="connecting">Connecting…</string>
+    <string name="cannot_connect">Can not connect.</string>
+    <string name="clear">Clear</string>
+</resources>
