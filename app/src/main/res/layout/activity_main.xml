@@ -11,42 +11,42 @@
         android:layout_height="match_parent">
 
         <Button
-            android:id="@+id/connectButton"
+            android:id="@+id/baglanButonu"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:text="@string/connect" />
 
         <EditText
-            android:id="@+id/messageEditText"
+            android:id="@+id/mesajAlani"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/connectButton"
+            android:layout_below="@+id/baglanButonu"
             android:ems="10"
             android:hint="@string/message"
             android:inputType="textPersonName"
             android:visibility="invisible" />
 
         <Button
-            android:id="@+id/sendButton"
+            android:id="@+id/gonderButonu"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/messageEditText"
+            android:layout_below="@+id/mesajAlani"
             android:text="@string/send_message"
             android:visibility="invisible" />
 
         <TextView
-            android:id="@+id/messagesTextView"
+            android:id="@+id/tumMesajlar"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@+id/sendButton"
+            android:layout_below="@+id/gonderButonu"
             android:layout_marginTop="45dp"
             android:hint="@string/no_message"
             android:textColor="@color/colorPrimary"
             android:visibility="invisible" />
 
         <TextView
-            android:id="@+id/connectingTextView"
+            android:id="@+id/baglantiBilgisi"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
@@ -56,11 +56,11 @@
             android:visibility="invisible" />
 
         <Button
-            android:id="@+id/clearButton"
+            android:id="@+id/temizleButonu"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
-            android:layout_below="@+id/sendButton"
+            android:layout_below="@+id/gonderButonu"
             android:text="@string/clear"
             android:visibility="invisible" />
 

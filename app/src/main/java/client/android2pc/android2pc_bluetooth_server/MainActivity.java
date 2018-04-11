@@ -14,144 +14,152 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
 
-    EditText messageEditText;
-    TextView messagesTextView;
-    TextView connectingTextView;
-    Button connectButton;
-    Button sendButton;
-    Button clearButton;
+    EditText mesajAlani;
+    TextView tumMesajlar;
+    TextView baglantiBilgisi;
+    Button baglanButonu;
+    Button gonderButonu;
+    Button temizleButonu;
 
     private static final String TAG = "MainActivity";
-    private static final String SERVER_MAC_ADDRESS = "64:80:99:92:2F:83";
+    private static final String SERVERIN_MAC_ADRESI = "64:80:99:92:2F:83";
     private static final String SOCKET_UUID_STRING = "00001101-0000-1000-8000-00805F9B34FB";
 
     private BluetoothSocket bluetoothSocket = null;
 
+    // İlk Çalışan Metod
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        messageEditText = (EditText) findViewById(R.id.messageEditText);
-        messagesTextView = (TextView) findViewById(R.id.messagesTextView);
-        connectButton = (Button) findViewById(R.id.connectButton);
-        connectingTextView = (TextView) findViewById(R.id.connectingTextView);
-        sendButton = (Button) findViewById(R.id.sendButton);
-        clearButton = (Button) findViewById(R.id.clearButton);
+        mesajAlani = (EditText) findViewById(R.id.mesajAlani);
+        tumMesajlar = (TextView) findViewById(R.id.tumMesajlar);
+        baglanButonu = (Button) findViewById(R.id.baglanButonu);
+        baglantiBilgisi = (TextView) findViewById(R.id.baglantiBilgisi);
+        gonderButonu = (Button) findViewById(R.id.gonderButonu);
+        temizleButonu = (Button) findViewById(R.id.temizleButonu);
 
-        connectButton.setOnClickListener(new View.OnClickListener() {
+        baglanButonu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                connectingTextView.setVisibility(View.VISIBLE);
-                connectingTextView.setText(R.string.connecting);
 
-                BluetoothSocket bluetoothSocket = getRfCOMMSocketInstance();
+                // Soket bağlantısı oluşturuluyor.
+                BluetoothSocket bluetoothSocket = SoketAc();
 
                 if (bluetoothSocket != null && bluetoothSocket.isConnected()) {
-                    connectingTextView.setVisibility(View.INVISIBLE);
-                    messageEditText.setVisibility(View.VISIBLE);
-                    messagesTextView.setVisibility(View.VISIBLE);
-                    sendButton.setVisibility(View.VISIBLE);
-                    clearButton.setVisibility(View.VISIBLE);
-                    connectButton.setEnabled(false);
+                    // Arayüz değişiklileri
+                    mesajAlani.setVisibility(View.VISIBLE);
+                    tumMesajlar.setVisibility(View.VISIBLE);
+                    gonderButonu.setVisibility(View.VISIBLE);
+                    temizleButonu.setVisibility(View.VISIBLE);
+                    baglanButonu.setEnabled(false);
 
-                    BluetoothSocketListener bsl = new BluetoothSocketListener(bluetoothSocket, new Handler(), messagesTextView);
+                    // Soket üzerinden gelen mesajları dinleyen thread.
+                    GelenMesajlariDinle bsl = new GelenMesajlariDinle(bluetoothSocket, tumMesajlar);
                     Thread messageListener = new Thread(bsl);
                     messageListener.start();
                 } else {
-                    connectingTextView.setText(R.string.cannot_connect);
+                    // Bağlantı yapılamadı bilgisi
+                    baglantiBilgisi.setVisibility(View.VISIBLE);
+                    baglantiBilgisi.setText(R.string.cannot_connect);
                 }
 
             }
         });
 
-        sendButton.setOnClickListener(new View.OnClickListener() {
+        gonderButonu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                String message = messageEditText.getText().toString();
+                String mesaj = mesajAlani.getText().toString();
 
-                if (message.length() <= 0) return;
+                if (mesaj.length() <= 0) return;
 
-                new SendMessageToServer().execute(message);
-                messageEditText.setText("");
+                // Server a mesajı gönderen AsyncTask
+                new ServeraGonder().execute(mesaj);
+                mesajAlani.setText("");
             }
         });
 
-        clearButton.setOnClickListener(new View.OnClickListener() {
+        temizleButonu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                messagesTextView.setText("");
+                tumMesajlar.setText("");
             }
         });
     }
 
-    private synchronized BluetoothSocket getRfCOMMSocketInstance() {
+    private synchronized BluetoothSocket SoketAc() {
         if (bluetoothSocket == null || !bluetoothSocket.isConnected()) {
+            // Bluetooth adapter ı alıyoruz. Bluetooth kapalıysa açıyoruz.
             BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
             mBluetoothAdapter.enable();
-            // Client knows the server MAC address
-            BluetoothDevice mmDevice = mBluetoothAdapter.getRemoteDevice(SERVER_MAC_ADDRESS);
+            // Server a bağlanıyoruz.
+            BluetoothDevice mmDevice = mBluetoothAdapter.getRemoteDevice(SERVERIN_MAC_ADRESI);
 
-            Log.d(TAG, "got hold of remote device");
             try {
-                // UUID string same used by server
+                // Bluetooth üzerinden cihazlar arası soket oluturuluyor.
                 bluetoothSocket = mmDevice.createInsecureRfcommSocketToServiceRecord(UUID
                         .fromString(SOCKET_UUID_STRING));
-                Log.d(TAG, "bluetooth socket created");
+                Log.d(TAG, "Soket oluşturuldu");
 
-                mBluetoothAdapter.cancelDiscovery();    // Cancel, discovery slows connection
+                // Keşfetmeyi kapatıyoruz. (Bağlantı hızı için)
+                mBluetoothAdapter.cancelDiscovery();
 
+                // Sokete bağlanıyoruz.
                 bluetoothSocket.connect();
-                Log.d(TAG, "connected to server");
+                Log.d(TAG, "Servera bağlanıldı");
 
                 return bluetoothSocket;
             } catch (Exception e) {
 
-                Log.d(TAG, "Error creating bluetooth socket");
+                Log.d(TAG, "Soket oluşturma hatası");
                 Log.d(TAG, e.getMessage());
                 return null;
             }
 
         } else {
-            Log.d(TAG, "bluetooth socket already exists");
+            Log.d(TAG, "Soket zaten var");
             return this.bluetoothSocket;
         }
     }
 
-    private class SendMessageToServer extends AsyncTask<String, Void, String> {
+    // Server'a mesaj gönderen AsyncTask
+    private class ServeraGonder extends AsyncTask<String, Void, String> {
 
+        // Bu metod arkaplanda çalışarak GUI'ı kilitlemeden mesajı soket üzerinden gönderiyor.
         @Override
         protected String doInBackground(String... messages) {
-
 
             final String message = messages[0];
 
             Log.d(TAG, "doInBackground");
             try {
-                BluetoothSocket bluetoothSocket = getRfCOMMSocketInstance();
+                // Soketi alarak mesajı gönderiyoruz.
+                BluetoothSocket bluetoothSocket = SoketAc();
 
                 bluetoothSocket.getOutputStream().write(message.length());
                 bluetoothSocket.getOutputStream().write(message.getBytes());
                 bluetoothSocket.getOutputStream().flush();
 
+                // tumMesajlar alanına gönderilen mesaj basılıyor.
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        messagesTextView.setText(messagesTextView.getText().toString() + "\nTO SERVER -> " + message);
+                        tumMesajlar.setText(tumMesajlar.getText().toString() + "\nServer'a gönderilen veri -> " + message);
                     }
                 });
 
-                Log.d(TAG, "Message Successfully sent to server");
+                Log.d(TAG, "Mesaj server a başarıyla gönderildi");
 
             } catch (Exception e) {
 
-                Log.d(TAG, "Error while IO operations");
+                Log.d(TAG, "Mesaj gönderme hatası");
                 Log.d(TAG, e.getMessage());
                 return "";
             }
@@ -160,57 +168,45 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private class MessagePoster implements Runnable {
-        private TextView messagesTextView;
-        private String message;
-
-        public MessagePoster(TextView messagesTextView, String message) {
-            this.messagesTextView = messagesTextView;
-            this.message = message;
-        }
-
-        public void run() {
-            if (message.length() >= 0)
-                messagesTextView.setText(messagesTextView.getText().toString() + "\nFROM SERVER <- " + message);
-        }
-    }
-
-    private class BluetoothSocketListener implements Runnable {
+    // Server'dan gelen mesajları dinleyen thread
+    private class GelenMesajlariDinle implements Runnable {
 
         private BluetoothSocket socket;
-        private TextView textView;
-        private Handler handler;
+        private TextView tumMesajlar;
 
-        public BluetoothSocketListener(BluetoothSocket socket,
-                                       Handler handler, TextView textView) {
+        public GelenMesajlariDinle(BluetoothSocket socket, TextView textView) {
             this.socket = socket;
-            this.textView = textView;
-            this.handler = handler;
+            this.tumMesajlar = textView;
         }
 
         public void run() {
-            int bufferSize = 1024;
-            byte[] buffer = new byte[bufferSize];
+
             try {
-
-
+                // Sürekli dinliyoruz.
                 while (true) {
-                    int len = bluetoothSocket.getInputStream().read();
-                    byte[] data = new byte[len];
+                    int mesajUzunlugu = bluetoothSocket.getInputStream().read();
+                    byte[] veri = new byte[mesajUzunlugu];
 
-                    len = 0;
-                    // read the message
-                    while (len != data.length) {
-                        int ch = bluetoothSocket.getInputStream().read(data, len, data.length - len);
+                    mesajUzunlugu = 0;
+                    // Mesajı okuyoruz.
+                    while (mesajUzunlugu != veri.length) {
+                        int ch = bluetoothSocket.getInputStream().read(veri, mesajUzunlugu, veri.length - mesajUzunlugu);
                         if (ch == -1) {
                             break;
                         }
-                        len += ch;
+                        mesajUzunlugu += ch;
                     }
 
-                    final String message = new String(data).trim();
+                    final String mesaj = new String(veri).trim();
 
-                    handler.post(new MessagePoster(textView, message));
+                    // Gelen mesajı tumMesajlar alanına yazıyoruz.
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (mesaj.length() >= 0)
+                                tumMesajlar.setText(tumMesajlar.getText().toString() + "\nServer'dan gelen veri <- " + mesaj);
+                        }
+                    });
                 }
 
             } catch (IOException e) {
