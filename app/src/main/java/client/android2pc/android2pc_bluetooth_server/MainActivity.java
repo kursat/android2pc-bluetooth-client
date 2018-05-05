@@ -19,6 +19,7 @@ import java.util.UUID;
 public class MainActivity extends AppCompatActivity {
 
     EditText mesajAlani;
+    EditText sifreAlani;
     TextView tumMesajlar;
     TextView baglantiBilgisi;
     Button baglanButonu;
@@ -26,7 +27,12 @@ public class MainActivity extends AppCompatActivity {
     Button temizleButonu;
 
     private static final String TAG = "MainActivity";
-    private static final String SERVERIN_MAC_ADRESI = "64:80:99:92:2F:83";
+    private static final String SIFRE = "123456";
+    /**
+     * Fikri
+     */
+    private static final String SERVERIN_MAC_ADRESI = "24:0A:64:86:A0:A8";
+//    private static final String SERVERIN_MAC_ADRESI = "64:80:99:92:2F:83";
     private static final String SOCKET_UUID_STRING = "00001101-0000-1000-8000-00805F9B34FB";
 
     private BluetoothSocket bluetoothSocket = null;
@@ -37,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        sifreAlani = (EditText) findViewById(R.id.sifreAlani);
         mesajAlani = (EditText) findViewById(R.id.mesajAlani);
         tumMesajlar = (TextView) findViewById(R.id.tumMesajlar);
         baglanButonu = (Button) findViewById(R.id.baglanButonu);
@@ -48,6 +55,15 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
+                if (!sifreAlani.getText().toString().equals(MainActivity.SIFRE)) {
+
+                    baglantiBilgisi.setVisibility(View.VISIBLE);
+                    baglantiBilgisi.setText(R.string.wrong_password);
+
+                    return;
+
+                }
+
                 // Soket bağlantısı oluşturuluyor.
                 BluetoothSocket bluetoothSocket = SoketAc();
 
@@ -57,7 +73,10 @@ public class MainActivity extends AppCompatActivity {
                     tumMesajlar.setVisibility(View.VISIBLE);
                     gonderButonu.setVisibility(View.VISIBLE);
                     temizleButonu.setVisibility(View.VISIBLE);
-                    baglanButonu.setEnabled(false);
+
+                    sifreAlani.setVisibility(View.GONE);
+                    baglanButonu.setVisibility(View.GONE);
+                    baglantiBilgisi.setVisibility(View.GONE);
 
                     // Soket üzerinden gelen mesajları dinleyen thread.
                     GelenMesajlariDinle bsl = new GelenMesajlariDinle(bluetoothSocket, tumMesajlar);

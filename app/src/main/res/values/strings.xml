@@ -7,4 +7,6 @@
     <string name="connecting">Bağlanıyor…</string>
     <string name="cannot_connect">Bağlantı yapılamadı.</string>
     <string name="clear">Temizle</string>
+    <string name="sifre">Şifre</string>
+    <string name="wrong_password">Şifre Hatalı</string>
 </resources>

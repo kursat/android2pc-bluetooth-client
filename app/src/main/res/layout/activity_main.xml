@@ -10,11 +10,19 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <EditText
+            android:id="@+id/sifreAlani"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:hint="@string/sifre" />
+
         <Button
             android:id="@+id/baglanButonu"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
+            android:layout_below="@+id/sifreAlani"
+            android:ems="10"
             android:text="@string/connect" />
 
         <EditText
