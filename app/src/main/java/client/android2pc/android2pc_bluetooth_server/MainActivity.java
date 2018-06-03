@@ -179,12 +179,25 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected String doInBackground(String... messages) {
 
-            final String message = messages[0];
+            final String message = messages[0].trim();
 
+            // onaltılık kontrolü
             if (!MainActivity.isHexadecimal(message)) {
                 tumMesajlar.setText(tumMesajlar.getText().toString() + "\nERR: Lütfen onaltılık tabanda bir sayı giriniz.");
 
                 return "";
+            }
+
+            // hex büyüklüğü kontrolü (7fffffffffffffff)
+            if (message.length() > 16) {
+                tumMesajlar.setText(tumMesajlar.getText().toString() + "\nERR: Long maksimum 7fffffffffffffff değerini alabilir.");
+                return "";
+            } else if (message.length() == 16) {
+                int val = Integer.parseInt(message.substring(0, 1), 16);
+                if (val > 7) {
+                    tumMesajlar.setText(tumMesajlar.getText().toString() + "\nERR: Long maksimum 7fffffffffffffff değerini alabilir.");
+                    return "";
+                }
             }
 
             Log.d(TAG, "doInBackground");
