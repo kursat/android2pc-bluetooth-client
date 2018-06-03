@@ -12,8 +12,10 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.IOException;
+import java.util.Objects;
 import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
@@ -32,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
      * Fikri
      */
     private static final String SERVERIN_MAC_ADRESI = "24:0A:64:86:A0:A8";
-//    private static final String SERVERIN_MAC_ADRESI = "64:80:99:92:2F:83";
+    //    private static final String SERVERIN_MAC_ADRESI = "64:80:99:92:2F:83";
     private static final String SOCKET_UUID_STRING = "00001101-0000-1000-8000-00805F9B34FB";
 
     private BluetoothSocket bluetoothSocket = null;
@@ -148,6 +150,28 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public static boolean isHexadecimal(String text) {
+        Objects.requireNonNull(text);
+        if (text.length() < 1)
+            throw new IllegalArgumentException("Text cannot be empty.");
+
+        char[] hexDigits = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+                'a', 'b', 'c', 'd', 'e', 'f', 'A', 'B', 'C', 'D', 'E', 'F'};
+
+        for (char symbol : text.toCharArray()) {
+            boolean found = false;
+            for (char hexDigit : hexDigits) {
+                if (symbol == hexDigit) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found)
+                return false;
+        }
+        return true;
+    }
+
     // Server'a mesaj gönderen AsyncTask
     private class ServeraGonder extends AsyncTask<String, Void, String> {
 
@@ -156,6 +180,13 @@ public class MainActivity extends AppCompatActivity {
         protected String doInBackground(String... messages) {
 
             final String message = messages[0];
+
+            if (!MainActivity.isHexadecimal(message)) {
+                Toast.makeText(getApplicationContext(), "Lütfen onaltılık tabanda bir sayı giriniz.",
+                        Toast.LENGTH_LONG).show();
+
+                return "";
+            }
 
             Log.d(TAG, "doInBackground");
             try {
