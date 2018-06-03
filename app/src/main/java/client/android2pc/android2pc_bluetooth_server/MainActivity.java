@@ -182,8 +182,7 @@ public class MainActivity extends AppCompatActivity {
             final String message = messages[0];
 
             if (!MainActivity.isHexadecimal(message)) {
-                Toast.makeText(getApplicationContext(), "Lütfen onaltılık tabanda bir sayı giriniz.",
-                        Toast.LENGTH_LONG).show();
+                tumMesajlar.setText(tumMesajlar.getText().toString() + "\nERR: Lütfen onaltılık tabanda bir sayı giriniz.");
 
                 return "";
             }
